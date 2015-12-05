@@ -32,6 +32,8 @@ public class KeyBricksGUI implements Runnable, Observer {
 		_window.setFocusTraversalKeysEnabled(false);
 		
 		_saveButton = new JButton("Save");
+		_saveButton.addMouseListener(new MouseClickListener(_model));
+		
 
 		KeyPressHandler keyHandler = new KeyPressHandler(_model);
 		_window.addKeyListener(keyHandler);
