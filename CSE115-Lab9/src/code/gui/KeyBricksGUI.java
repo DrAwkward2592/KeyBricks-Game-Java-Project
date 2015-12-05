@@ -17,6 +17,7 @@ public class KeyBricksGUI implements Runnable, Observer {
 	private KeyBricksModel _model;
 	private JPanel _boardPanel;
 	private JFrame _window;
+	private JButton _saveButton;
 	
 	public KeyBricksGUI(KeyBricksModel m) {
 		_model = m;
@@ -29,6 +30,8 @@ public class KeyBricksGUI implements Runnable, Observer {
 		_window.getContentPane().setLayout(new FlowLayout());
 		_window.setFocusable(true);
 		_window.setFocusTraversalKeysEnabled(false);
+		
+		_saveButton = new JButton("Save");
 
 		KeyPressHandler keyHandler = new KeyPressHandler(_model);
 		_window.addKeyListener(keyHandler);
@@ -36,6 +39,7 @@ public class KeyBricksGUI implements Runnable, Observer {
 		createAndPopulateBoard();
 
 		_window.add(_boardPanel);
+		_window.add(_saveButton);
 		_window.pack();
 		_window.setVisible(true);
 	}
