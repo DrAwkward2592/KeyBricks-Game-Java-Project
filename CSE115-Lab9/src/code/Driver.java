@@ -7,6 +7,7 @@ import code.model.KeyBricksModel;
 
 public class Driver {
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new KeyBricksGUI(new KeyBricksModel()));
+	
+			SwingUtilities.invokeLater(new KeyBricksGUI(new KeyBricksModel(args)));
 	}
 }

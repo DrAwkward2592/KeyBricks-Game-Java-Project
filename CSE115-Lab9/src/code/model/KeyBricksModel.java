@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import code.fileIO.FileIO;
 import code.model.tile.ITile;
 import code.model.tile.PlaceHolderTile;
 import code.model.tile.RealTile;
@@ -15,33 +16,84 @@ import code.model.tile.RealTile;
  * lab 9 solution code. 
  */
 public class KeyBricksModel {
-	
+
 	public static final int COLS = 5;
 	public static final int ROWS = COLS;
-	
-	private Observer _observer;	// who to notify when the model changes
-	
-	private ArrayList<ArrayList<ITile>> _board; // a representation of the board (non-graphical)
-	
+
+	private Observer _observer; // who to notify when the model changes
+
+	private ArrayList<ArrayList<ITile>> _board; // a representation of the board
+												// (non-graphical)
+
 	private ArrayList<Character> _letters;
-	
-	public KeyBricksModel() {
-		_observer = null;
-		initializeLetters();
-		initializeBoard();
+	private boolean isGameRestored = false;
+	private String gameRestoredString;
+	private String gameRestoredLetters;
+	private String gameRestoredColors;
+
+	/*
+	 * public KeyBricksModel() { _observer = null; initializeLetters();
+	 * initializeBoard(); }
+	 */
+
+	public KeyBricksModel(String[] args) {
+		if(args.length>0){
+			isGameRestored = true;
+			gameRestoredString = new String();
+			gameRestoredLetters = new String();
+			gameRestoredColors = new String();
+			gameRestoredString = FileIO.readFileToString(args[0]);
+			
+			for(int i=0;i<gameRestoredString.length();i=i+2){
+				gameRestoredLetters = gameRestoredLetters + gameRestoredString.charAt(i);
+			}
+			
+			for(int i=1;i<gameRestoredString.length();i=i+2){
+				gameRestoredColors = gameRestoredColors + gameRestoredString.charAt(i);
+			}
+			
+			System.out.println("The game was restored from the following string");
+			System.out.println(gameRestoredString);
+			System.out.println(gameRestoredLetters);
+			System.out.println(gameRestoredColors);
+			_observer = null;
+			initializeLetters();
+			initializeBoard();
+		}
+		
+		else{
+			_observer = null;
+			initializeLetters();
+			initializeBoard();
+		}
+		
 	}
-	
+
 	public void initializeBoard() {
 		_board = new ArrayList<ArrayList<ITile>>();
-		for (int c=0; c<COLS; c++) {
+		int index=0;
+		for (int c = 0; c < COLS; c++) {
 			ArrayList<ITile> col = new ArrayList<ITile>();
 			_board.add(col);
-			for (int r=0; r<ROWS; r++) {
-				RealTile t = new RealTile(ColorUtility.getRandomColor());
-				col.add(t);
+			for (int r = 0; r < ROWS; r++) {
+				
+				if(isGameRestored==true){
+					RealTile t = new RealTile(ColorUtility.char2color(gameRestoredColors.charAt(index)));
+					t.setCharacter(gameRestoredLetters.charAt(index));
+					col.add(t);
+					index++;
+				}
+				
+				else{
+					RealTile t = new RealTile(ColorUtility.getRandomColor());
+					col.add(t);
+					
+				}
 			}
+			
 		}
-		ensureEnoughTilesWithCharacters();
+		
+			ensureEnoughTilesWithCharacters();
 	}
 
 	public void initializeLetters() {
@@ -50,11 +102,11 @@ public class KeyBricksModel {
 			_letters.add(c);
 		}
 	}
-	
+
 	public void setObserver(Observer obs) {
 		_observer = obs;
 	}
-	
+
 	public void gameStateChanged() {
 		if (_observer != null) {
 			_observer.update();
@@ -62,15 +114,19 @@ public class KeyBricksModel {
 	}
 
 	public ITile get(int col, int row) {
-		if (col < 0 || col >= COLS) { return null; }
-		if (row < 0 || row >= ROWS) { return null; }
+		if (col < 0 || col >= COLS) {
+			return null;
+		}
+		if (row < 0 || row >= ROWS) {
+			return null;
+		}
 		return _board.get(col).get(row);
 	}
 
 	public void remove(char ch) {
-		for (int c=0; c<COLS; c++) {
-			for (int r=0; r<ROWS; r++) {
-				ITile t = get(c,r);
+		for (int c = 0; c < COLS; c++) {
+			for (int r = 0; r < ROWS; r++) {
+				ITile t = get(c, r);
 				if (t.isRealTile()) {
 					if (ch == t.getCharacter()) {
 						removeAdjacentSameColorTiles(t);
@@ -82,22 +138,22 @@ public class KeyBricksModel {
 			}
 		}
 	}
-	
+
 	public void removeAdjacentSameColorTiles(ITile tile) {
 		ArrayList<ITile> toBeChecked = new ArrayList<ITile>();
 		toBeChecked.add(tile);
 		HashSet<ITile> toBeRemoved = new HashSet<ITile>();
 		// STAGE 1: find tiles that need to be removed
-		while (! toBeChecked.isEmpty()) {
+		while (!toBeChecked.isEmpty()) {
 			ITile t = toBeChecked.remove(0);
 			toBeRemoved.add(t);
 			Point p = locationOfTile(t);
 			int c = p.x;
 			int r = p.y;
-			checkTile(c, r-1, toBeChecked, toBeRemoved, t);
-			checkTile(c, r+1, toBeChecked, toBeRemoved, t);
-			checkTile(c-1, r, toBeChecked, toBeRemoved, t);
-			checkTile(c+1, r, toBeChecked, toBeRemoved, t);
+			checkTile(c, r - 1, toBeChecked, toBeRemoved, t);
+			checkTile(c, r + 1, toBeChecked, toBeRemoved, t);
+			checkTile(c - 1, r, toBeChecked, toBeRemoved, t);
+			checkTile(c + 1, r, toBeChecked, toBeRemoved, t);
 		}
 		// STAGE 2: remove them
 		for (ITile t : toBeRemoved) {
@@ -106,15 +162,16 @@ public class KeyBricksModel {
 	}
 
 	public void ensureEnoughTilesWithCharacters() {
-		ArrayList<RealTile> allAndOnlyRealTiles;  // all 'real' tiles on the board
-		allAndOnlyRealTiles =  allAndOnlyRealTiles();
+		ArrayList<RealTile> allAndOnlyRealTiles; // all 'real' tiles on the
+													// board
+		allAndOnlyRealTiles = allAndOnlyRealTiles();
 
 		// check if game is over
 		if (allAndOnlyRealTiles().size() == 0) {
 			System.out.println("Game over!");
 			System.exit(0);
 		}
-		
+
 		// count how many tiles have a letter
 		int howManyTilesWithLetters = 0;
 		for (RealTile t : allAndOnlyRealTiles) {
@@ -122,15 +179,16 @@ public class KeyBricksModel {
 				howManyTilesWithLetters = howManyTilesWithLetters + 1;
 			}
 		}
-		
+
 		// make sure new letters are placed randomly
 		Collections.shuffle(allAndOnlyRealTiles);
 
 		// replenish the supply of letter tiles on board
-		int numberOfLettersWeWantToAddToBoard = COLS-howManyTilesWithLetters;
+		int numberOfLettersWeWantToAddToBoard = COLS - howManyTilesWithLetters;
 		int numberOfPlaceHolderTilesOnBoard = allAndOnlyRealTiles.size() - howManyTilesWithLetters;
-		int maximumNumberOfLettersWeCanAddToBoard = Math.min(numberOfLettersWeWantToAddToBoard, numberOfPlaceHolderTilesOnBoard);
-		for (int i=0; i < maximumNumberOfLettersWeCanAddToBoard; i = i + 1) {
+		int maximumNumberOfLettersWeCanAddToBoard = Math.min(numberOfLettersWeWantToAddToBoard,
+				numberOfPlaceHolderTilesOnBoard);
+		for (int i = 0; i < maximumNumberOfLettersWeCanAddToBoard; i = i + 1) {
 			RealTile t = getRealTileWithoutLetter(allAndOnlyRealTiles);
 			t.setCharacter(_letters.remove(0));
 		}
@@ -147,13 +205,16 @@ public class KeyBricksModel {
 
 	// find all the RealTiles on the board, return as an ArrayList
 	public ArrayList<RealTile> allAndOnlyRealTiles() {
-		ArrayList<RealTile> allAndOnlyRealTiles;  // all 'real' tiles on the board
+		ArrayList<RealTile> allAndOnlyRealTiles; // all 'real' tiles on the
+													// board
 		allAndOnlyRealTiles = new ArrayList<RealTile>();
-		for (int c=0; c<COLS; c++) {
-			for (int r=0; r<ROWS; r++) {
-				ITile t = get(c,r);
+		for (int c = 0; c < COLS; c++) {
+			for (int r = 0; r < ROWS; r++) {
+				ITile t = get(c, r);
 				if (t.isRealTile()) {
-					allAndOnlyRealTiles.add((RealTile) t);  // add all and only RealTiles to collection
+					allAndOnlyRealTiles.add((RealTile) t); // add all and only
+															// RealTiles to
+															// collection
 				}
 			}
 		}
@@ -161,30 +222,32 @@ public class KeyBricksModel {
 	}
 
 	public Point locationOfTile(ITile t) {
-		for (int c=0; c<COLS; c++) {
-			for (int r=0; r<ROWS; r++) {
-				if ( t == get(c,r) ) { // '==' is correct here - we want to find exactly the tile t
-					return new Point(c,r);
+		for (int c = 0; c < COLS; c++) {
+			for (int r = 0; r < ROWS; r++) {
+				if (t == get(c, r)) { // '==' is correct here - we want to find
+										// exactly the tile t
+					return new Point(c, r);
 				}
 			}
 		}
 		return null;
 	}
-	
+
 	public void checkTile(int c, int r, ArrayList<ITile> toBeChecked, HashSet<ITile> toBeRemoved, ITile target) {
-		ITile tileToBeChecked = get(c,r);
+		ITile tileToBeChecked = get(c, r);
 		if (target.matches(tileToBeChecked)) {
 			if (!toBeRemoved.contains(tileToBeChecked)) {
 				toBeChecked.add(tileToBeChecked);
 			}
 		}
 	}
-	
+
 	public void removeFromBoard(ITile target) {
 		Point p = locationOfTile(target);
 		int c = p.x;
 		int r = p.y;
-		_board.get(c).remove(r);  // remove a RealTile
-		_board.get(c).add(0,new PlaceHolderTile());  // add a PlaceHolder tile at top of column
+		_board.get(c).remove(r); // remove a RealTile
+		_board.get(c).add(0, new PlaceHolderTile()); // add a PlaceHolder tile
+														// at top of column
 	}
 }

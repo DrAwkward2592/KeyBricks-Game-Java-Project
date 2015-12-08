@@ -3,6 +3,7 @@ package code.gui;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import code.fileIO.FileIO;
 import code.model.ColorUtility;
 import code.model.KeyBricksModel;
 
@@ -11,13 +12,13 @@ public class MouseClickListener implements MouseListener {
 	private String fileState;
 	public MouseClickListener(KeyBricksModel m) {
 		_model = m;
-		fileState = new String();
 	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Character letter;
 		char color;
+		fileState = new String();
 		for(int r=0;r<_model.ROWS;r++){
 			for(int c=0;c<_model.COLS;c++){
 				letter = _model.get(r, c).getCharacter();
@@ -27,8 +28,9 @@ public class MouseClickListener implements MouseListener {
 			}
 		}
 		
+		FileIO.writeStringToFile("lab9.kbr", fileState);
+		System.out.println("The game was saved in the following string");
 		System.out.println(fileState);
-
 		
 	}
 
