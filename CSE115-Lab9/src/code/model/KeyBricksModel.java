@@ -52,10 +52,10 @@ public class KeyBricksModel {
 				gameRestoredColors = gameRestoredColors + gameRestoredString.charAt(i);
 			}
 			
-			System.out.println("The game was restored from the following string");
+			System.out.println("The game was restored from msaditya.kbr to the following string");
 			System.out.println(gameRestoredString);
-			System.out.println(gameRestoredLetters);
-			System.out.println(gameRestoredColors);
+			System.out.println("The letters in the restored game were " + gameRestoredLetters);
+			System.out.println("The colors in the restored game were " + gameRestoredColors);
 			_observer = null;
 			initializeLetters();
 			initializeBoard();
@@ -78,6 +78,7 @@ public class KeyBricksModel {
 			for (int r = 0; r < ROWS; r++) {
 				
 				if(isGameRestored==true){
+					
 					RealTile t = new RealTile(ColorUtility.char2color(gameRestoredColors.charAt(index)));
 					t.setCharacter(gameRestoredLetters.charAt(index));
 					col.add(t);
@@ -87,13 +88,13 @@ public class KeyBricksModel {
 				else{
 					RealTile t = new RealTile(ColorUtility.getRandomColor());
 					col.add(t);
-					
 				}
 			}
 			
 		}
-		
-			ensureEnoughTilesWithCharacters();
+			if(isGameRestored==false){
+				ensureEnoughTilesWithCharacters();
+			}
 	}
 
 	public void initializeLetters() {

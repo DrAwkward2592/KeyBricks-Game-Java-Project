@@ -19,8 +19,8 @@ public class MouseClickListener implements MouseListener {
 		Character letter;
 		char color;
 		fileState = new String();
-		for(int r=0;r<_model.ROWS;r++){
-			for(int c=0;c<_model.COLS;c++){
+		for(int r=0;r<KeyBricksModel.ROWS;r++){
+			for(int c=0;c<KeyBricksModel.COLS;c++){
 				letter = _model.get(r, c).getCharacter();
 				color = ColorUtility.color2char(_model.get(r, c).getColor());
 				fileState = fileState + Character.toString(letter.charValue());
@@ -28,7 +28,7 @@ public class MouseClickListener implements MouseListener {
 			}
 		}
 		
-		FileIO.writeStringToFile("lab9.kbr", fileState);
+		FileIO.writeStringToFile("msaditya.kbr", fileState);
 		System.out.println("The game was saved in the following string");
 		System.out.println(fileState);
 		
